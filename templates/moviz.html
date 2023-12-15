@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flixie - Best movie collections</title>
+
+  <!-- 
+    - favicon
+  -->
+  <link rel="shortcut icon" href="./favicon.svg" type="image/svg+xml">
+
+  <!-- 
+    - custom css link
+  -->
+  <link rel="stylesheet" href="./assets/css/moviz.css">
+
+  <!-- 
+    - google font link
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .search-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 90%;
+      transform: translate(-50%, -50%);
+      background-color: black;
+      padding: 20px;
+      border: 1px solid #ccc;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      display: none;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .close-btn {
+      cursor: pointer;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 16px;
+      color: white;
+      border: none;
+      background: none;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: white;
+    }
+
+    input {
+      padding: 8px;
+      margin-bottom: 10px;
+      width: 100%;
+      max-width: 400px;
+      color: black;
+    }
+
+  
+    #searchResult {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      color: white;
+      gap: 20px;
+    }
+
+    .movie-card {
+      padding: 15px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+      color: white;
+    }
+
+    .movie-card:hover {
+      transform: scale(1.05);
+    }
+   
+    </style>
+  <style>
+    /* Your existing styles here */
+
+    /* Add the following styles for the curved line */
+    #curved-line {
+      position: fixed;
+      pointer-events: none;
+      width: 100%;
+      height: 100%;
+      color: white;
+      z-index: 1111;
+    }
+
+    .curve {
+      position: absolute;
+      border: 5px solid white; /* Change the border style as needed */
+      border-radius: 50%;
+      color: white;
+      width: 10px; /* Adjust the width of the line */
+      height: 10px; /* Adjust the height of the line */
+      background-color: transparent;
+    }
+  </style>
+</head>
+
+<body id="top">
+  <!-- Curved line container -->
+  <div id="curved-line"></div>
+
+  <script>
+    // JavaScript to create the curved line that follows the mouse
+    document.addEventListener('DOMContentLoaded', function () {
+      const curvedLineContainer = document.getElementById('curved-line');
+      const body = document.getElementById('top');
+
+      // Create multiple points along the curved line
+      for (let i = 0; i < 20; i++) {
+        const curve = document.createElement('div');
+        curve.classList.add('curve');
+        curvedLineContainer.appendChild(curve);
+      }
+
+      // Update the position of the curved line and set cursor based on mouse movement
+      document.addEventListener('mousemove', function (event) {
+        const curves = document.querySelectorAll('.curve');
+        curves.forEach((curve, index) => {
+          const angle = (index / curves.length) * Math.PI * 2;
+          const radius = 50; // Adjust the radius of the curvature
+          const x = event.clientX + Math.cos(angle) * radius;
+          const y = event.clientY + Math.sin(angle) * radius;
+
+          curve.style.left = `${x}px`;
+          curve.style.top = `${y}px`;
+
+          // Determine the direction of mouse movement and set cursor accordingly
+          const deltaX = event.movementX;
+          const deltaY = event.movementY;
+
+          if (deltaX > 0) {
+              body.style.cursor = 'e-resize';
+          } else if (deltaX < 0) {
+              body.style.cursor = 'w-resize';
+          }
+
+          if (deltaY > 0) {
+              body.style.cursor = 's-resize';
+          } else if (deltaY < 0) {
+              body.style.cursor = 'n-resize';
+          }
+        });
+      });
+    });
+  </script>
+ 
+
+  <header id="top" class="header" data-header>
+    <div class="container">
+
+      <div class="overlay" data-overlay></div>
+
+      <a href="/" class="logo">
+       <h1 style="color: white;">FLIXIE</h1>
+      </a>
+
+      <div class="header-actions">
+
+        <button class="search-btn" onclick="toggleSearchContainer()">
+          <ion-icon name="search-outline"></ion-icon>
+        </button>
+
+        <div class="search-container" id="searchContainer">
+          <button class="close-btn" onclick="toggleSearchContainer()">X</button>
+          <h2>Search Movie by Name</h2>
+         <div style="width:100%; display: flex; align-items:center; justify-content:center; ">
+           <input type="text" id="searchInput" placeholder="Enter movie name">
+           <button style="color:black;  margin-left: 20px; cursor: pointer; background-color: white; height: fit-content;  margin-bottom: 5px; border-radius: 10px;padding: 5px;" onclick="searchMovies()">Search</button>
+         </div>
+          <div id="searchResult"></div>
+        </div>
+
+        <script>
+          function toggleSearchContainer() {
+            var searchContainer = document.getElementById('searchContainer');
+            searchContainer.style.display = (searchContainer.style.display === 'block') ? 'none' : 'block';
+          }
+
+          function searchMovies() {
+            var searchInput = document.getElementById('searchInput').value.toLowerCase();
+            var searchResultContainer = document.getElementById('searchResult');
+            searchResultContainer.innerHTML = `Loading Movies...`;
+
+            // Fetch the data from data.json
+            fetch('./data/json/data.json')
+              .then(response => response.json())
+              .then(data => {
+                // Filter only movies based on the search input
+                var result = data.filter(function (movie) {
+                  return movie.type.toLowerCase() === 'movie' && movie.title.toLowerCase().includes(searchInput);
+                });
+
+                // Display the search result
+                displaySearchResult(result);
+              })
+              .catch(error => {
+                console.error('Error fetching data:', error);
+              });
+          }
+
+
+          function displaySearchResult(result) {
+            var searchResultContainer = document.getElementById('searchResult');
+            searchResultContainer.innerHTML = '';
+
+            if (result.length > 0) {
+              result.forEach(function (movie) {
+                var movieInfo = document.createElement('div');
+                movieInfo.innerHTML = `
+
+                <li>
+                <div class="movie-card">
+                  <a href="/moviedetails?id=${movie.id}&tag=${movie.tags[0]}">
+                    <figure class="card-banner">
+                      <img src="${movie.thumbnail}" alt="${movie.title} movie poster">
+                    </figure>
+                  </a>
+                  <div class="title-wrapper">
+                    <a href="/moviedetails?id=${movie.id}&tag=${movie.tags[0]}">
+                      <h3 class="card-title">${movie.title}</h3>
+                    </a>
+                    <time datetime="${movie.release_date}">${movie.release_date}</time>
+                  </div>
+                  <div class="card-meta">
+                    <div class="badge badge-outline">${movie.type}</div>
+                    <div class="duration">
+                      <ion-icon name="time-outline"></ion-icon>
+                      <time datetime="PT${movie.duration}M">${movie.duration} min</time>
+                    </div>
+                    <div class="rating">
+                      <ion-icon name="star"></ion-icon>
+                      <data>${movie.rating}</data>
+                    </div>
+                  </div>
+                </div>
+              </li>
+              `;
+                searchResultContainer.appendChild(movieInfo);
+              });
+            } else {
+              searchResultContainer.innerHTML = 'No movies found.';
+            }
+          }
+        </script>
+        
+        <div class="lang-wrapper">
+          <label for="language">
+            <ion-icon name="globe-outline"></ion-icon>
+          </label>
+
+          <select name="language" id="language">
+            <option value="en">EN</option>
+            <option value="au">AU</option>
+            <option value="ar">AR</option>
+            <option value="tu">TU</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary">Sign in</button>
+
+      </div>
+
+      <button class="menu-open-btn" data-menu-open-btn>
+        <ion-icon name="reorder-two"></ion-icon>
+      </button>
+
+      <nav class="navbar" data-navbar>
+
+        <div class="navbar-top">
+
+          <a href="./index.html" class="logo">
+             <h1 style="color: white;">FLIXIE</h1>
+          </a>
+
+          <button class="menu-close-btn" data-menu-close-btn>
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+
+        </div>
+
+        <ul class="navbar-list">
+
+          <li>
+            <a href="#top" class="navbar-link">Home</a>
+          </li>
+
+          <li>
+            <a href="#topRated" class="navbar-link">Movie</a>
+          </li>
+
+          <li>
+            <a href="#tvSeries" class="navbar-link">Tv Show</a>
+          </li>
+
+          <li>
+            <a href="#upcoming" class="navbar-link">Upcoming</a>
+          </li>
+
+          <li>
+            <a href="#" class="navbar-link">Pricing</a>
+          </li>
+
+        </ul>
+
+        <ul class="navbar-social-list">
+
+          <li>
+            <a href="#" class="navbar-social-link">
+              <ion-icon name="logo-twitter"></ion-icon>
+            </a>
+          </li>
+
+          <li>
+            <a href="#" class="navbar-social-link">
+              <ion-icon name="logo-facebook"></ion-icon>
+            </a>
+          </li>
+
+          <li>
+            <a href="#" class="navbar-social-link">
+              <ion-icon name="logo-pinterest"></ion-icon>
+            </a>
+          </li>
+
+          <li>
+            <a href="#" class="navbar-social-link">
+              <ion-icon name="logo-instagram"></ion-icon>
+            </a>
+          </li>
+
+          <li>
+            <a href="#" class="navbar-social-link">
+              <ion-icon name="logo-youtube"></ion-icon>
+            </a>
+          </li>
+
+        </ul>
+
+      </nav>
+
+    </div>
+  </header>
+  <main>
+    <article>
+
+      <!-- 
+        - #HERO
+      -->
+
+      <section class="hero">
+        <div class="container">
+
+          <div class="hero-content">
+
+            <p class="hero-subtitle">Flixie</p>
+
+            <h1 class="h1 hero-title">
+              Unlimited <strong>Movie</strong>, TVs Shows, & More.
+            </h1>
+
+            <div class="meta-wrapper">
+
+              <div class="badge-wrapper">
+                <div class="badge badge-fill">PG 18</div>
+
+                <div class="badge badge-outline">HD</div>
+              </div>
+
+              <div class="ganre-wrapper">
+                <a href="#">Romance,</a>
+
+                <a href="#">Drama</a>
+              </div>
+
+              <div class="date-time">
+
+                <div>
+                  <ion-icon name="calendar-outline"></ion-icon>
+
+                  <time datetime="2022">2022</time>
+                </div>
+
+                <div>
+                  <ion-icon name="time-outline"></ion-icon>
+
+                  <time datetime="PT128M">128 min</time>
+                </div>
+
+              </div>
+
+            </div>
+
+            <button class="btn btn-primary">
+              <ion-icon name="play"></ion-icon>
+
+              <span>Watch now</span>
+            </button>
+
+          </div>
+
+        </div>
+      </section>
+
+
+
+
+
+      <!-- 
+        - #UPCOMING
+      -->
+
+      <section class="upcoming">
+        <div class="container">
+          <div class="flex-wrapper">
+            <div class="title-wrapper">
+              <p class="section-subtitle">Online Streaming</p>
+              <h2 class="h2 section-title">Upcoming Movies</h2>
+            </div>
+            <ul class="filter-list">
+              <li>
+                <button class="filter-btn">Movies</button>
+              </li>
+              <li>
+                <button class="filter-btn">TV Shows</button>
+              </li>
+              <li>
+                <button class="filter-btn">Anime</button>
+              </li>
+            </ul>
+          </div>
+          <ul id="upcoming" class="movies-list has-scrollbar">
+            <!-- Movies will be dynamically added here -->
+          </ul>
+        </div>
+      </section>
+    
+
+
+
+
+
+      <!-- 
+        - #SERVICE
+      -->
+
+      <section class="service">
+        <div class="container">
+
+          <div class="service-banner">
+            <figure>
+              <img src="./assets/images/service-banner.jpg" alt="HD 4k resolution! only $3.99">
+            </figure>
+
+            <a href=""  class="service-btn">
+              <span>Download</span>
+
+              <ion-icon name="download-outline"></ion-icon>
+            </a>
+          </div>
+
+          <div class="service-content">
+
+            <p class="service-subtitle">Our Services</p>
+
+            <h2 class="h2 service-title">Download Your Shows Watch Offline.</h2>
+
+            <p class="service-text">
+              Lorem ipsum dolor sit amet, consecetur adipiscing elseddo eiusmod tempor.There are many variations of
+              passages of lorem
+              Ipsum available, but the majority have suffered alteration in some injected humour.
+            </p>
+
+            <ul class="service-list">
+
+              <li>
+                <div class="service-card">
+
+                  <div class="card-icon">
+                    <ion-icon name="tv"></ion-icon>
+                  </div>
+
+                  <div class="card-content">
+                    <h3 class="h3 card-title">Enjoy on Your TV.</h3>
+
+                    <p class="card-text">
+                      Lorem ipsum dolor sit amet, consecetur adipiscing elit, sed do eiusmod tempor.
+                    </p>
+                  </div>
+
+                </div>
+              </li>
+
+              <li>
+                <div class="service-card">
+
+                  <div class="card-icon">
+                    <ion-icon name="videocam"></ion-icon>
+                  </div>
+
+                  <div class="card-content">
+                    <h3 class="h3 card-title">Watch Everywhere.</h3>
+
+                    <p class="card-text">
+                      Lorem ipsum dolor sit amet, consecetur adipiscing elit, sed do eiusmod tempor.
+                    </p>
+                  </div>
+
+                </div>
+              </li>
+
+            </ul>
+
+          </div>
+
+        </div>
+      </section>
+
+
+
+
+
+      <!-- 
+        - #TOP RATED
+      -->
+
+      <section class="top-rated">
+        <div class="container">
+
+          <p class="section-subtitle">Online Streaming</p>
+
+          <h2 class="h2 section-title">Top Rated Movies</h2>
+
+          <ul class="filter-list">
+
+            <li>
+              <button class="filter-btn">Movies</button>
+            </li>
+
+            <li>
+              <button class="filter-btn">TV Shows</button>
+            </li>
+
+            <li>
+              <button class="filter-btn">Documentary</button>
+            </li>
+
+            <li>
+              <button class="filter-btn">Sports</button>
+            </li>
+
+          </ul>
+
+          <ul id="topRated" class="movies-list">
+
+          </ul>
+
+        </div>
+      </section>
+
+    
+
+
+
+
+      <!-- 
+        - #TV SERIES
+      -->
+<style>
+  #series-card {aspect-ratio: 2 / 3;}
+</style>
+      <section class="tv-series">
+        <div class="container">
+
+          <p class="section-subtitle">Best TV Series</p>
+
+          <h2 class="h2 section-title">World Best TV Series</h2>
+
+          <ul id="tvSeries" class="movies-list">
+          </ul>
+
+        </div>
+      </section>
+
+    
+
+
+
+
+      <!-- 
+        - #CTA
+      -->
+
+      <section class="cta">
+        <div class="container">
+
+          <div class="title-wrapper">
+            <h2 class="cta-title">Trial start After some days.</h2>
+
+            <p class="cta-text">
+              Enter your email to create or restart your membership.
+            </p>
+          </div>
+
+          <form action="/subscribe" method="post" class="cta-form" id="subscribeForm">
+              <input type="email" name="email" required placeholder="Enter your email" class="email-field">
+              <button type="submit" class="cta-form-btn">Get started</button>
+          </form>
+
+        </div>
+      </section>
+
+    </article>
+  </main>
+ 
+  <footer class="footer">
+
+    <div class="footer-top">
+      <div class="container">
+
+        <div class="footer-brand-wrapper">
+
+          <a href="/" class="logo">
+             <h1 style="color: white;">FLIXIE</h1>
+          </a>
+
+          <ul class="footer-list">
+
+            <li>
+              <a href="#top" class="footer-link">Home</a>
+            </li>
+
+            <li>
+              <a href="#topRated" class="footer-link">Movie</a>
+            </li>
+
+            <li>
+              <a href="#tvSeries" class="footer-link">TV Show</a>
+            </li>
+
+            <li>
+              <a href="#upcoming" class="footer-link">Upcoming</a>
+            </li>
+
+            <li>
+              <a href="#" class="footer-link">Pricing</a>
+            </li>
+
+          </ul>
+
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="quicklink-wrapper">
+
+          <ul class="quicklink-list">
+
+            <li>
+              <a href="#" class="quicklink-link">Faq</a>
+            </li>
+
+            <li>
+              <a href="#" class="quicklink-link">Help center</a>
+            </li>
+
+            <li>
+              <a href="#" class="quicklink-link">Terms of use</a>
+            </li>
+
+            <li>
+              <a href="#" class="quicklink-link">Privacy</a>
+            </li>
+
+          </ul>
+
+          <ul class="social-list">
+
+            <li>
+              <a href="#" class="social-link">
+                <ion-icon name="logo-facebook"></ion-icon>
+              </a>
+            </li>
+
+            <li>
+              <a href="#" class="social-link">
+                <ion-icon name="logo-twitter"></ion-icon>
+              </a>
+            </li>
+
+            <li>
+              <a href="#" class="social-link">
+                <ion-icon name="logo-pinterest"></ion-icon>
+              </a>
+            </li>
+
+            <li>
+              <a href="#" class="social-link">
+                <ion-icon name="logo-linkedin"></ion-icon>
+              </a>
+            </li>
+
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container">
+        <p class="copyright">
+          &copy; 2023 <a href="#">flixie</a>. All Rights Reserved
+        </p>
+        <img src="./assets/images/footer-bottom-img.png" alt="Online banking companies logo" class="footer-bottom-img">
+      </div>
+    </div>
+
+  </footer>
+  <a href="#top" class="go-top" data-go-top>
+    <ion-icon name="chevron-up"></ion-icon>
+  </a>
+  <script src="./assets/js/script.js"></script>
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+  <script id="rendered-js">
+      const canvas = document.querySelector("canvas");
+      const ctx = canvas.getContext('2d');
+
+      // for intro motion
+      let mouseMoved = false;
+
+      const pointer = {
+          x: .5 * window.innerWidth,
+          y: .5 * window.innerHeight
+      };
+
+      const params = {
+          pointsNumber: 40,
+          widthFactor: .3,
+          mouseThreshold: .6,
+          spring: .4,
+          friction: .5
+      };
+
+
+      const trail = new Array(params.pointsNumber);
+      for (let i = 0; i < params.pointsNumber; i++) {
+          trail[i] = {
+              x: pointer.x,
+              y: pointer.y,
+              dx: 0,
+              dy: 0
+          };
+
+      }
+
+      window.addEventListener("click", e => {
+          updateMousePosition(e.pageX, e.pageY);
+      });
+      window.addEventListener("mousemove", e => {
+          mouseMoved = true;
+          updateMousePosition(e.pageX, e.pageY);
+      });
+      window.addEventListener("touchmove", e => {
+          mouseMoved = true;
+          updateMousePosition(e.targetTouches[0].pageX, e.targetTouches[0].pageY);
+      });
+
+      function updateMousePosition(eX, eY) {
+          pointer.x = eX;
+          pointer.y = eY;
+      }
+
+      setupCanvas();
+      update(0);
+      window.addEventListener("resize", setupCanvas);
+
+
+      function update(t) {
+
+          // for intro motion
+          if (!mouseMoved) {
+              pointer.x = (.5 + .3 * Math.cos(.002 * t) * Math.sin(.005 * t)) * window.innerWidth;
+              pointer.y = (.5 + .2 * Math.cos(.005 * t) + .1 * Math.cos(.01 * t)) * window.innerHeight;
+          }
+
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          trail.forEach((p, pIdx) => {
+              const prev = pIdx === 0 ? pointer : trail[pIdx - 1];
+              const spring = pIdx === 0 ? .4 * params.spring : params.spring;
+              p.dx += (prev.x - p.x) * spring;
+              p.dy += (prev.y - p.y) * spring;
+              p.dx *= params.friction;
+              p.dy *= params.friction;
+              p.x += p.dx;
+              p.y += p.dy;
+          });
+
+          ctx.beginPath();
+          ctx.moveTo(trail[0].x, trail[0].y);
+
+          for (let i = 1; i < trail.length - 1; i++) {
+              const xc = .5 * (trail[i].x + trail[i + 1].x);
+              const yc = .5 * (trail[i].y + trail[i + 1].y);
+              ctx.quadraticCurveTo(trail[i].x, trail[i].y, xc, yc);
+              ctx.lineWidth = params.widthFactor * (params.pointsNumber - i);
+              ctx.stroke();
+          }
+          ctx.lineTo(trail[trail.length - 1].x, trail[trail.length - 1].y);
+          ctx.stroke();
+
+          window.requestAnimationFrame(update);
+      }
+
+      function setupCanvas() {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+      }
+      //# sourceURL=pen.js
+  </script>
+  <script>
+      document.addEventListener('DOMContentLoaded', function () {
+          const subscribeForm = document.getElementById('subscribeForm');
+
+          subscribeForm.addEventListener('submit', function (event) {
+              event.preventDefault();
+
+              fetch('/subscribe', {
+                  method: 'POST',
+                  body: new FormData(subscribeForm),
+              })
+              .then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      if (data.reload) {
+                          // Reload the page
+                          location.reload();
+                      }
+                  } else {
+                      console.error(data.message);
+                  }
+              })
+              .catch(error => console.error('Error:', error));
+          });
+      });
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Load the data from data.json (replace with the correct path)
+      fetch('./data/json/data.json')
+        .then(response => response.json())
+        .then(data => {
+          // Filter TV Series
+          const tvSeries = data.filter(item => item.type === 'series');
+
+          // Get the tvSeries container
+          const tvSeriesList = document.getElementById('tvSeries');
+
+          // Clear the existing content
+          tvSeriesList.innerHTML = '';
+
+          // Append each TV Series to the tvSeries container
+          tvSeries.forEach(series => {
+            const seriesItem = `
+              <li>
+                <div class="movie-card">
+                  <a href="/moviedetails?id=${series.id}&tag=${series.tags[0]}">
+                    <figure id='series-card' class="card-banner">
+                     <img src="${series.thumbnail}" alt="${series.title} movie poster">
+                    </figure>s
+                  </a>
+                  <div class="title-wrapper">
+                    <a href="/moviedetails?id=${series.id}&tag=${series.tags[0]}">
+                      <h3 class="card-title">${series.title}</h3>
+                    </a>
+                    <time datetime="${series.release_date}">${series.release_date}</time>
+                  </div>
+                  <div class="card-meta">
+                    <div class="badge badge-outline">${series.quality}</div>
+                    <div class="duration">
+                      <ion-icon name="time-outline"></ion-icon>
+                      <time datetime="PT${series.duration}M">${series.duration} min</time>
+                    </div>
+                    <div class="rating">
+                      <ion-icon name="star"></ion-icon>
+                      <data>${series.rating}</data>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            `;
+            tvSeriesList.innerHTML += seriesItem;
+          });
+        })
+        .catch(error => console.error('Error fetching data:', error));
+    });
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Load the data from data.json (replace with the correct path)
+      fetch('./data/json/data.json')
+        .then(response => response.json())
+        .then(data => {
+          // Filter top-rated movies
+          const topRatedMovies = data.filter(item => item.type === 'movie');
+
+          // Get the movies-list container
+          const moviesList = document.getElementById("topRated");
+
+          // Clear the existing content
+          moviesList.innerHTML = '';
+
+          // Append each movie to the movies-list container
+          topRatedMovies.forEach(movie => {
+            const movieItem = `
+              <li>
+                <div class="movie-card">
+                  <a href="/moviedetails?id=${movie.id}&tag=${movie.tags[0]}">
+                    <figure class="card-banner">
+                      <img src="${movie.thumbnail}" alt="${movie.title} movie poster">
+                    </figure>
+                  </a>
+                  <div class="title-wrapper">
+                    <a href="/moviedetails?id=${movie.id}&tag=${movie.tags[0]}">
+                      <h3 class="card-title">${movie.title}</h3>
+                    </a>
+                    <time datetime="${movie.release_date}">${movie.release_date}</time>
+                  </div>
+                  <div class="card-meta">
+                    <div class="badge badge-outline">${movie.type}</div>
+                    <div class="duration">
+                      <ion-icon name="time-outline"></ion-icon>
+                      <time datetime="PT${movie.duration}M">${movie.duration} min</time>
+                    </div>
+                    <div class="rating">
+                      <ion-icon name="star"></ion-icon>
+                      <data>${movie.rating}</data>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            `;
+            moviesList.innerHTML += movieItem;
+          });
+        })
+        .catch(error => console.error('Error fetching data:', error));
+    });
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Load the data from data.json (replace with the correct path)
+      fetch('./data/json/data.json')
+        .then(response => response.json())
+        .then(data => {
+          // Filter movies of type "movie"
+          const movies = data.filter(item => item.type === 'upcoming');
+
+          // Get the movies-list container
+          const moviesList = document.getElementById("upcoming");
+
+          // Clear the existing content
+          moviesList.innerHTML = '';
+
+          // Append each movie to the movies-list container
+          movies.forEach(movie => {
+            const movieItem = `
+              <li>
+                <div class="movie-card">
+                  <a href="/moviedetails?id=${movie.id}&tag=${movie.tags[0]}">
+                    <figure class="card-banner">
+                     <img src="${movie.thumbnail}" alt="${movie.title} movie poster">
+                    </figure>
+                  </a>
+
+                  <div class="title-wrapper">
+                    <a href="/moviedetails?id=${movie.id}&tag=${movie.tags[0]}">
+                      <h3 class="card-title">${movie.title}</h3>
+                    </a>
+                    <time datetime="2022">${movie.release_date}</time>
+                  </div>
+
+                  <div class="card-meta">
+                    <div class="badge badge-outline">HD</div>
+                    <div class="duration">
+                      <ion-icon name="time-outline"></ion-icon>
+                      <time datetime="PT${movie.duration}M">${movie.duration} min</time>
+                    </div>
+                    <div class="rating">
+                      <ion-icon name="star"></ion-icon>
+                      <data>${movie.rating}</data>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            `;
+            moviesList.innerHTML += movieItem;
+          });
+        })
+        .catch(error => console.error('Error fetching data:', error));
+    });
+  </script>
+  
+</body>
+
+</html>
