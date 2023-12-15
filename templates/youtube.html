@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video Downloader</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color:black;
+    }
+
+    h1 {
+        color: white;
+        text-align: center;
+    }
+
+    form {
+        max-width: 600px;
+        margin: 20px auto;
+        background: black;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        color: white;
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    button {
+        background-color: #4caf50;
+        color:white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    /* Optional: Style for better readability of tags input */
+    input[name="tags"] {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        color: black;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+      /* Apply basic styling to the form */
+      form {
+          max-width: 400px;
+          margin: 0 auto;
+          padding: 20px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Style the label */
+      label {
+          display: block;
+          margin-bottom: 8px;
+      }
+
+      /* Style the input fields and select dropdown */
+      input,
+      select {
+          width: 100%;
+          padding: 8px;
+          margin-bottom: 12px;
+          box-sizing: border-box;
+      }
+
+      /* Style the submit button */
+      button {
+          background-color: #4caf50;
+          color: white;
+          padding: 10px 15px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+      }
+
+      /* Change button color on hover */
+      button:hover {
+          background-color: #45a049;
+      }
+
+      /* Style the select dropdown arrow */
+      select {
+          appearance: none;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          background: url('https://cdn.iconscout.com/icon/free/png-256/down-arrow-3967743-3275004.png') no-repeat right center;
+          background-size: 20px;
+        color: white;
+      }
+
+      /* Style the select dropdown options */
+      select option {
+          background-color: black;
+          color:white;
+      }
+
+    /* Optional: Adjust styles for smaller screens */
+    @media (max-width: 600px) {
+        form {
+            width: 80%;
+        }
+    }
+
+  </style>
+</head>
+  <body>
+    <h1>YouTube Video Downloader</h1>
+    <form id="downloadForm"  method="post">
+        <label for="video_url">YouTube Video URL:</label>
+        <input type="text" id="video_url" name="video_url" required>
+
+      <label for="title">Title:</label>
+      <input type="text" id="title" name="title" required>
+
+        <!-- New input fields -->
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description" required>
+
+        <label for="release_date">Release Date:</label>
+        <input type="text" id="release_date" name="release_date" required>
+
+        <label for="rating">Rating:</label>
+        <input type="number" id="rating" name="rating" required>
+
+        <label for="studios">Studios:</label>
+        <input type="text" id="studios" name="studios" required>
+
+        <label for="tags">Tags (comma-separated):</label>
+        <input type="text" id="tags" name="tags" required>
+
+        <!-- New select dropdown -->
+        <label for="genre">Type:</label>
+        <select id="genre" name="genre" required>
+            <option value="movie">Movie</option>
+            <option value="cartoon">Cartoon</option>
+            <option value="series">Series</option>
+        </select>
+
+      <button type="button" onclick="submitForm()">Download</button>
+    </form>
+    <div id="errorContainer" style="color: red; margin-top: 10px;"></div>
+
+    <script>
+        function submitForm() {
+            // Get form data
+            const formData = new FormData(document.getElementById('downloadForm'));
+
+            // Fetch options
+            const fetchOptions = {
+                method: 'POST',
+                body: formData,
+            };
+
+            // Clear previous error message
+            document.getElementById('errorContainer').innerText = '';
+            console.log("Starting............")
+
+            // Make the fetch request
+            fetch('/download', fetchOptions)
+                .then(response => {
+                    // Check if the response status is OK
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    // Parse the response as JSON
+                    return response.json();
+                })
+                .then(data => {
+                    // Handle the response data
+                    if (data.success) {
+                        alert('Video downloaded and uploaded successfully. ID: ' + data.id);
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+
+                    // Display the error message on the HTML page
+                    document.getElementById('errorContainer').innerText = 'An error occurred. Please try again.';
+                });
+        }
+    </script>
+  </body>
+  </html>
