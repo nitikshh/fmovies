@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video</title>
+
+  <!-- 
+    - favicon
+  -->
+  <link rel="shortcut icon" href="./favicon.svg" type="image/svg+xml">
+
+  <!-- 
+    - custom css link
+  -->
+  <link rel="stylesheet" href="./assets/css/moviz.css">
+
+  <!-- 
+    - google font link
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body id="#top">
+
+  <!-- 
+    - #HEADER
+  -->
+
+  <header class="header" data-header>
+    <div class="container">
+
+      <div class="overlay" data-overlay></div>
+
+      <a href="/" class="logo">
+         <h1 style="color: white;">FLIXIE</h1>
+      </a>
+
+      <div class="header-actions">
+
+        <button class="search-btn">
+          <ion-icon name="search-outline"></ion-icon>
+        </button>
+
+        <div class="lang-wrapper">
+          <label for="language">
+            <ion-icon name="globe-outline"></ion-icon>
+          </label>
+
+          <select name="language" id="language">
+            <option value="en">EN</option>
+            <option value="au">AU</option>
+            <option value="ar">AR</option>
+            <option value="tu">TU</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary">Sign in</button>
+
+      </div>
+
+      <button class="menu-open-btn" data-menu-open-btn>
+        <ion-icon name="reorder-two"></ion-icon>
+      </button>
+
+      <nav class="navbar" data-navbar>
+
+        <div class="navbar-top">
+
+          <a href="/" class="logo">
+             <h1 style="color: white;">FLIXIE</h1>
+          </a>
+
+          <button class="menu-close-btn" data-menu-close-btn>
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+
+        </div>
+
+        <ul class="navbar-list">
+
+          <li>
+            <a href="/" class="navbar-link">Home</a>
+          </li>
+
+          <li>
+            <a href="#" class="navbar-link">Movie</a>
+          </li>
+
+          <li>
+            <a href="#" class="navbar-link">Tv Show</a>
+          </li>
+
+          <li>
+            <a href="#" class="navbar-link">Web Series</a>
+          </li>
+
+          <li>
+            <a href="#" class="navbar-link">Pricing</a>
+          </li>
+
+        </ul>
+
+        <ul class="navbar-social-list">
+
+          <li>
+            <a href="#" class="navbar-social-link">
+              <ion-icon name="logo-twitter"></ion-icon>
+            </a>
+          </li>
+
+          <li>
+            <a href="#" class="navbar-social-link">
+              <ion-icon name="logo-facebook"></ion-icon>
+            </a>
+          </li>
+
+          <li>
+            <a href="#" class="navbar-social-link">
+              <ion-icon name="logo-pinterest"></ion-icon>
+            </a>
+          </li>
+
+          <li>
+            <a href="#" class="navbar-social-link">
+              <ion-icon name="logo-instagram"></ion-icon>
+            </a>
+          </li>
+
+          <li>
+            <a href="#" class="navbar-social-link">
+              <ion-icon name="logo-youtube"></ion-icon>
+            </a>
+          </li>
+
+        </ul>
+
+      </nav>
+
+    </div>
+  </header>
+
+
+
+
+
+  <main>
+    <article>
+
+      <!-- 
+        - #MOVIE DETAIL
+      -->
+      <section class="movie-detail">
+        <div id=videocontflexcolmn class="container">
+          <div id="videocontainer">
+            <figure class="movie-detail-banner">
+              <img id="videoImage" src="" alt="movie poster">
+              <button id="playButton" class="play-btn">
+                <ion-icon name="play-circle-outline"></ion-icon>
+              </button>
+            </figure>
+          </div>
+         
+
+          <script>
+            document.addEventListener('DOMContentLoaded', function () {
+              // Add a click event listener to the play button
+              const playButton = document.getElementById('playButton');
+              const downloadButtonContainer = document.getElementById('downloadbuttoncontainer');
+              playButton.addEventListener('click', function () {
+                // Parse URL to get the video ID parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                const videoId = urlParams.get('id');
+
+                // Fetch data from data.json (you may need to adjust the path)
+                fetch('data/json/data.json')
+                  .then(response => response.json())
+                  .then(data => {
+                    // Find the video data based on the specified ID
+                    const videoData = data.find(item => item.id === videoId);
+
+                    // Log the video path
+                    console.log(videoData.video_path);
+
+                    // Create an iframe element and set its attributes
+                    const iframeElement = document.createElement('iframe');
+                    iframeElement.classList.add('videoplayer');
+                    iframeElement.src = `https://drive.google.com/file/d/${videoData.video_path}/preview`;
+                    iframeElement.width = '100%';
+                    iframeElement.height = '300'; // Adjust the height as needed
+
+                    // Replace the existing banner with the iframe element
+                    const movieDetailBanner = document.querySelector('.movie-detail-banner');
+                    movieDetailBanner.innerHTML = '';
+                    movieDetailBanner.appendChild(iframeElement);
+
+                    // Update the download button href when the iframe src is set
+                    const downloadButton = document.getElementById('downloadButton');
+                    downloadButton.href = iframeElement.src;
+                  })
+                  .catch(error => console.error('Error fetching JSON data:', error));
+              });
+            });
+          </script>
+
+
+
+
+
+
+          <div class="movie-detail-content">
+            <div style="color:white; display:flex;">
+              <button style="color:white;"  id="fullscreenButton" class="fullscreen-btn">
+                <ion-icon  name="scan-outline"></ion-icon>
+              </button>
+              <span style="color:white; margin-left:10px;">Fullscreen</span>
+            </div>
+            <p class="detail-subtitle">New Movies</p>
+
+            <h1 id="videotitle" class="h1 detail-title">
+              <strong></strong>
+            </h1>
+
+            <div class="meta-wrapper">
+
+              <div class="badge-wrapper">
+                <div class="badge badge-fill"></div>
+
+                <div id="studios" class="badge badge-outline">HD</div>
+              </div>
+
+              <div id="genreWrapper" class="ganre-wrapper">
+                <a href="#"></a>
+
+                <a href="#"></a>
+
+                <a href="#"></a>
+
+                <a href="#"></a>
+              </div>
+
+              <div class="date-time">
+
+                <div>
+                  <ion-icon name="calendar-outline"></ion-icon>
+
+                  <time id="videouploadtime" datetime="2021"></time>
+                </div>
+
+                <div>
+                  <ion-icon name="time-outline"></ion-icon>
+
+                  <time id="videoduration" datetime="PT115M"></time>
+                </div>
+
+              </div>
+
+            </div>
+
+            <p id="videodescription" class="storyline">
+
+            </p>
+
+            <div class="details-actions">
+
+              <button class="share">
+                <ion-icon name="share-social"></ion-icon>
+
+                <span>Share</span>
+              </button>
+
+              <div class="title-wrapper">
+                <p class="title">Watch All Parts</p>
+
+                <p class="text">Click Below</p>
+              </div>
+
+              <button class="btn btn-primary">
+                <ion-icon name="play"></ion-icon>
+
+                <span>Watch Now</span>
+              </button>
+
+            </div>
+
+            <div id="downloadbuttoncontainer">
+             
+            </div>
+
+          </div>
+
+        </div>
+        <style>
+          .part-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* Default: 5 columns */
+            gap: 50px; /* Adjust the gap between buttons as needed */
+            margin-top: 30px;
+            margin: 30px;
+          }
+
+           .part-container .btn {
+            width: 100%;
+            text-align: center;
+          }
+          @media (max-width: 500px) {
+            .part-container {
+              grid-template-columns: repeat(1, 1fr); /* Adjust the number of columns for screens wider than 1000px */
+              width: 80%;
+              display: flex;
+              align-items:center;
+              justify-content:center;
+              flex-direction:column;
+            }
+            .part-container button{
+              width: 80%;
+              margin: 0 auto;
+            }
+          }
+          @media (min-width: 500px) {
+            .part-container {
+              grid-template-columns: repeat(1, 1fr); /* Adjust the number of columns for screens wider than 1000px */
+            }
+          }
+          @media (min-width: 700px) {
+            .part-container {
+              grid-template-columns: repeat(2, 1fr); /* Adjust the number of columns for screens wider than 1000px */
+            }
+          }
+          @media (min-width: 1000px) {
+            .part-container {
+              grid-template-columns: repeat(3, 1fr); /* Adjust the number of columns for screens wider than 1000px */
+              margin-top:100px;
+            }
+          }
+
+          @media (min-width: 1200px) {
+            .part-container {
+              grid-template-columns: repeat(4, 1fr); /* Adjust the number of columns for screens wider than 1200px */
+            }
+          }
+        </style>
+
+        <div class="part-container" id="videoButtonsContainer"></div>
+
+        <script>
+          // Parse URL to get the video ID parameter
+          const urlParamsforpart = new URLSearchParams(window.location.search);
+          const videoIdpartchange = urlParamsforpart.get('id');
+
+          // Fetch data from data.json
+          fetch('data/json/data.json')
+            .then(response => response.json())
+            .then(data => {
+              // Find the video data based on the specified ID
+              const videoData = data.find(item => item.id === videoIdpartchange);
+
+              if (videoData) {
+                // Get the video paths from the data
+                const videoPaths = Array.isArray(videoData.video_path) ? videoData.video_path : [videoData.video_path];
+
+                // Create buttons based on the number of video paths
+                const container = document.getElementById('videoButtonsContainer');
+
+                videoPaths.forEach((videoPath, index) => {
+                  const button = document.createElement('button');
+                  button.className = 'btn btn-primary';
+                  button.innerHTML = `<ion-icon name="play"></ion-icon><span>Part ${index + 1}</span>`;
+                  button.addEventListener('click', () => playVideo(videoPath));
+                  container.appendChild(button);
+                });
+
+                // Sample playVideo function
+                function playVideo(videoPath) {
+                  // Create an iframe element and set its attributes
+                  const iframeElement = document.createElement('iframe');
+                  iframeElement.classList.add('videoplayer');
+                  iframeElement.src = `https://drive.google.com/file/d/${videoPath}/preview`;
+                  iframeElement.width = '100%';
+                  iframeElement.height = '300'; // Adjust the height as needed
+
+                  // Replace the existing banner with the iframe element
+                  const movieDetailBanner = document.querySelector('.movie-detail-banner');
+                  movieDetailBanner.innerHTML = '';
+                  movieDetailBanner.appendChild(iframeElement);
+
+                  // Update the download button href when the iframe src is set
+                  const downloadButton = document.getElementById('downloadButton');
+                  downloadButton.href = iframeElement.src;
+                }
+              } else {
+                console.error(`Video data not found for ID: ${videoId}`);
+              }
+            })
+            .catch(error => {
+              console.error('Error fetching data:', error);
+            });
+        </script>
+
+      </section>
+
+
+
+
+
+      <!-- 
+        - #TV SERIES
+      -->
+
+      <section class="tv-series">
+        <div class="container">
+          <p class="section-subtitle">Best TV Series</p>
+          <h2 class="h2 section-title">World Best TV Series</h2>
+          <ul id="tagsaparatedcontainer" class="movies-list">
+          </ul>
+        </div>
+      </section>
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          // Parse URL to get the tag parameter
+          const urlParams = new URLSearchParams(window.location.search);
+          const tag = urlParams.get('tag');
+
+          // Fetch data from data.json (you may need to adjust the path)
+          fetch('data/json/data.json')
+            .then(response => response.json())
+            .then(data => {
+              // Filter data based on the specified tag
+              const filteredData = data.filter(item => item.tags.includes(tag));
+
+              // Filter movies from the filtered data
+              const movieData = filteredData.filter(item => item.type.toLowerCase() === 'movie');
+
+              // Shuffle the movieData array to get random movies
+              const shuffledMovies = shuffleArray(movieData);
+
+              // Display only the first 8 movies
+              const slicedMovies = shuffledMovies.slice(0, 8);
+
+              // Update HTML with filtered data
+              const moviesContainer = document.getElementById('tagsaparatedcontainer');
+              moviesContainer.innerHTML = slicedMovies.map(item => `
+                <li>
+                  <div class="movie-card">
+                    <a href="/moviedetails?id=${item.id}&tag=${item.tags[0]}">
+                      <figure class="card-banner">
+                        <img src="${item.thumbnail}" alt="${item.title} movie poster">
+                      </figure>
+                    </a>
+                    <div class="title-wrapper">
+                      <a href="/moviedetails?id=${item.id}&tag=${item.tags[0]}">
+                        <h3 class="card-title">${item.title}</h3>
+                      </a>
+                      <time datetime="${item.release_date}">${item.release_date}</time>
+                    </div>
+                    <div class="card-meta">
+                      <div class="badge badge-outline">HD</div>
+                      <div class="duration">
+                        <ion-icon name="time-outline"></ion-icon>
+                        <time datetime="PT${item.duration}M">${item.duration} min</time>
+                      </div>
+                      <div class="rating">
+                        <ion-icon name="star"></ion-icon>
+                        <data>${item.rating}</data>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              `).join('');
+
+              // Change the page title based on the first item's title
+              if (slicedMovies.length > 0) {
+                document.title = slicedMovies[0].title;
+              }
+            })
+            .catch(error => console.error('Error fetching JSON data:', error));
+
+          // Function to shuffle an array
+          function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+          }
+        });
+      </script>
+
+    </article>
+  </main>
+
+
+
+
+
+  <!-- 
+    - #FOOTER
+  -->
+
+  <footer class="footer">
+
+    <div class="footer-top">
+      <div class="container">
+
+        <div class="footer-brand-wrapper">
+
+          <a href="./index.html" class="logo">
+             <h1 style="color: white;">FLIXIE</h1>
+          </a>
+
+          <ul class="footer-list">
+
+            <li>
+              <a href="./index.html" class="footer-link">Home</a>
+            </li>
+
+            <li>
+              <a href="#" class="footer-link">Movie</a>
+            </li>
+
+            <li>
+              <a href="#" class="footer-link">TV Show</a>
+            </li>
+
+            <li>
+              <a href="#" class="footer-link">Web Series</a>
+            </li>
+
+            <li>
+              <a href="#" class="footer-link">Pricing</a>
+            </li>
+
+          </ul>
+
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="quicklink-wrapper">
+
+          <ul class="quicklink-list">
+
+            <li>
+              <a href="#" class="quicklink-link">Faq</a>
+            </li>
+
+            <li>
+              <a href="#" class="quicklink-link">Help center</a>
+            </li>
+
+            <li>
+              <a href="#" class="quicklink-link">Terms of use</a>
+            </li>
+
+            <li>
+              <a href="#" class="quicklink-link">Privacy</a>
+            </li>
+
+          </ul>
+
+          <ul class="social-list">
+
+            <li>
+              <a href="#" class="social-link">
+                <ion-icon name="logo-facebook"></ion-icon>
+              </a>
+            </li>
+
+            <li>
+              <a href="#" class="social-link">
+                <ion-icon name="logo-twitter"></ion-icon>
+              </a>
+            </li>
+
+            <li>
+              <a href="#" class="social-link">
+                <ion-icon name="logo-pinterest"></ion-icon>
+              </a>
+            </li>
+
+            <li>
+              <a href="#" class="social-link">
+                <ion-icon name="logo-linkedin"></ion-icon>
+              </a>
+            </li>
+
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container">
+
+        <p class="copyright">
+          &copy; 2023 <a href="#">flixie</a>. All Rights Reserved
+        </p>
+
+        <img src="/assets/images/footer-bottom-img.png" alt="Online banking companies logo" class="footer-bottom-img">
+
+      </div>
+    </div>
+
+  </footer>
+
+
+
+
+
+  <!-- 
+    - #GO TO TOP
+  -->
+
+  <a href="#top" class="go-top" data-go-top>
+    <ion-icon name="chevron-up"></ion-icon>
+  </a>
+
+
+
+
+
+  <!-- 
+    - custom js link
+  -->
+  <script src="./assets/js/script.js"></script>
+
+  <!-- 
+    - ionicon link
+  -->
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+  <!-- Include this script in your HTML file -->
+  <script>
+    // Function to update tag in URL
+    function updateTag(tag) {
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set('tag', tag);
+      window.history.pushState({}, '', currentUrl);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      // Get the video ID and tag from the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const videoId = urlParams.get('id');
+      const tag = urlParams.get('tag');
+
+      // Fetch JSON data
+      fetch('/data/json/data.json') // Adjust the path based on your file structure
+        .then(response => response.json())
+        .then(data => {
+          // Find the video with matching ID
+          const video = data.find(item => item.id === videoId);
+
+          // Set the page title
+          document.title = video.title || 'Video';
+
+          // Update HTML elements with video data
+          document.getElementById('videotitle').innerHTML = ` <strong>${video.title}</strong>`;
+          document.getElementById('videodescription').innerHTML = video.description || '';
+          document.getElementById('videouploadtime').innerHTML = new Date(video.release_date).getFullYear() || '';
+          document.getElementById('videoduration').innerHTML = `${video.duration} min` || '';
+          document.getElementById('studios').innerHTML = video.studios || '';
+
+          // Update tags
+          const genreWrapper = document.getElementById('genreWrapper');
+          const tags = video.tags || [];
+          genreWrapper.innerHTML = tags.map(tag => `<a href="" onclick="updateTag('${tag}')">${tag}</a>`).join(', ');
+
+          // Update image
+          const videoImage = document.getElementById('videoImage');
+          videoImage.src = `${video.thumbnail}`; // Adjust the path based on your file structure
+          videoImage.alt = `${video.title} movie poster`;
+
+          // Add click event listener to the fullscreen button
+          const fullscreenButton = document.getElementById('fullscreenButton');
+          fullscreenButton.addEventListener('click', toggleFullscreen);
+
+          function toggleFullscreen() {
+            const iframeElement = document.querySelector('.videoplayer');
+
+            if (iframeElement) {
+              if (document.fullscreenElement) {
+                // If the document is currently in fullscreen mode, exit fullscreen
+                document.exitFullscreen();
+              } else {
+                // If not in fullscreen mode, request fullscreen
+                iframeElement.requestFullscreen();
+              }
+            }
+          }
+        })
+        .catch(error => console.error('Error fetching JSON data:', error));
+    });
+  </script>
+
+
+
+</body>
+
+</html>
